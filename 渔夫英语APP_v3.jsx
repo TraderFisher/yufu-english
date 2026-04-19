@@ -715,7 +715,11 @@ const C = {
 export default function App() {
   const [vocab, setVocab] = useState(() => {
     const saved = store.get('yf_vocab');
-    return saved ? saved : toVocab(DEFAULT_RAW);
+    if (!saved) return toVocab(DEFAULT_RAW);
+    // 自动合并新词：把 DEFAULT_RAW 中本地没有的词追加进去
+    const savedIds = new Set(saved.map(v => v.id));
+    const newWords = toVocab(DEFAULT_RAW).filter(v => !savedIds.has(v.id));
+    return newWords.length > 0 ? [...saved, ...newWords] : saved;
   });
   const [wordSt, setWordSt] = useState(() => store.get('yf_wst') || {});
   const [sentSt, setSentSt] = useState(() => store.get('yf_sst') || {});
